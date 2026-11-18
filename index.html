@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My PROMPT Writer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1F2937; --muted:#4B5563; --line:#C5CBD6; --bg:#F7F8FA; --card:#FFFFFF;
+  --teal:#0F7676; --teal-d:#0A5555; --teal-l:#E3F2F1;
+  --orange:#B8491B; --orange-d:#8F3712; --orange-l:#FDEFE6;
+  --yellow-l:#FFF6D6; --star:#C98A00;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Andika',system-ui,sans-serif;font-size:18px;line-height:1.5}
+h1,h2,h3,.fred{font-family:'Fredoka',system-ui,sans-serif;font-weight:600;margin:0;line-height:1.2}
+button{font:inherit;cursor:pointer}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* top bar */
+.top{background:var(--card);border-bottom:1px solid #E5E7EB;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-family:'Fredoka',sans-serif;font-weight:700;font-size:26px}
+.brand span{color:var(--orange)}
+.top .who{margin-left:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:16px}
+.stars{display:inline-flex;align-items:center;gap:6px;background:var(--yellow-l);border-radius:999px;padding:4px 12px;font-family:'Fredoka',sans-serif;font-weight:600}
+.save{font-size:14px;color:var(--muted)}
+/* layout */
+.wrap{max-width:1180px;margin:0 auto;padding:20px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+nav.steps{flex:1 1 230px;max-width:260px;display:flex;flex-direction:column;gap:6px}
+main{flex:999 1 560px;min-width:0}
+@media (max-width:820px){nav.steps{max-width:none;flex-direction:row;overflow-x:auto;padding-bottom:6px}nav.steps .step{flex:0 0 auto}}
+.step{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1.5px solid transparent;background:transparent;border-radius:12px;padding:8px 10px;color:var(--ink);min-height:44px}
+.step:hover{background:#fff;border-color:#E5E7EB}
+.step[aria-current="step"]{background:#fff;border-color:var(--teal)}
+.num{flex:0 0 30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;background:#E5E7EB;color:var(--ink)}
+.step[aria-current="step"] .num{background:var(--teal);color:#fff}
+.num.done{background:var(--star);color:#fff}
+.step .lbl{font-size:16px;line-height:1.2}
+.panel{background:var(--card);border-radius:20px;padding:28px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.pill{display:inline-block;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--teal);padding:4px 12px;border-radius:999px}
+.pill.or{background:var(--orange)}
+.head{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.head h2{font-size:34px}
+.head p{margin:0;color:#374151;max-width:62ch}
+.card{border:1.5px solid var(--line);border-radius:var(--r);padding:18px;background:#fff}
+.card.t{border-color:var(--teal)} .card.o{border-color:var(--orange)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+label.l{display:block;font-weight:700;font-size:16px;margin-bottom:6px}
+.hint{font-size:15px;color:var(--muted)}
+textarea,input[type=text]{width:100%;font:inherit;font-size:19px;line-height:1.6;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:10px 14px;background:#fff}
+textarea{min-height:110px;resize:vertical}
+textarea.big{min-height:170px}
+textarea:focus,input[type=text]:focus{outline:3px solid #9FD3D0;border-color:var(--teal)}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 18px;border-radius:12px;border:2px solid var(--teal);background:var(--teal);color:#fff;font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px}
+.btn:hover{background:var(--teal-d);border-color:var(--teal-d)}
+.btn.ghost{background:#fff;color:var(--teal)}
+.btn.ghost:hover{background:var(--teal-l)}
+.btn.or{background:var(--orange);border-color:var(--orange)} .btn.or:hover{background:var(--orange-d)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:0 10px;font-size:15px}
+.icon-btn:hover{border-color:var(--teal);color:var(--teal)}
+.icon-btn.on{background:var(--orange-l);border-color:var(--orange);color:var(--orange)}
+.icon-btn svg{width:22px;height:22px}
+.word{font-family:'Fredoka',sans-serif;font-weight:700;font-size:30px}
+.feedback{font-size:16px;margin-top:6px;min-height:24px}
+.good{color:#1D6B36} .nudge{color:var(--orange-d)}
+.ex{background:var(--yellow-l);border-radius:var(--r);padding:16px 18px}
+.five{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.five label{font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;display:block;margin-bottom:4px}
+.five input{font-size:17px}
+.together{margin-top:10px;font-size:19px;background:var(--teal-l);border-radius:12px;padding:10px 14px;min-height:48px}
+.prompt{cursor:pointer;text-align:left;width:100%;font:inherit;color:var(--ink);display:flex;gap:14px;align-items:flex-start}
+.prompt:hover{border-color:var(--teal)}
+.prompt[aria-pressed="true"]{border:3px solid var(--teal);background:var(--teal-l)}
+.badge{flex:0 0 44px;height:44px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:22px}
+.starter{background:var(--orange-l);border-radius:12px;padding:10px 14px;font-size:19px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;min-height:40px;font-size:16px;color:var(--ink)}
+.chip:hover{border-color:var(--teal)}
+.chip.used{background:var(--teal);border-color:var(--teal);color:#fff}
+.bank{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;background:var(--yellow-l);border-radius:var(--r);padding:16px}
+.bank h3{font-size:17px;margin-bottom:8px}
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.type{border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.35}
+.type b{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;display:block}
+.tl{background:var(--teal-l)} .tl b{color:var(--teal)} .ol{background:var(--orange-l)} .ol b{color:var(--orange)}
+.blanks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.story-out{font-size:21px;line-height:1.9;background:#FFFDF7;border:1.5px solid #EADFC0;border-radius:var(--r);padding:20px 24px}
+.story-out mark{background:var(--yellow-l);border-bottom:2px solid var(--star);padding:0 3px;border-radius:4px;color:var(--ink)}
+.web{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.web .card h3{font-size:19px;margin-bottom:2px}
+.web .center{border:3px solid var(--teal);background:var(--teal-l)}
+.web textarea{min-height:100px;font-size:17px}
+.sense{display:flex;align-items:center;gap:8px;margin-top:6px}
+.sense span{flex:0 0 62px;font-size:15px}
+.sense input{font-size:16px;padding:6px 10px}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.plan h3{display:inline-block;color:#fff;padding:3px 14px;border-radius:999px;font-size:18px;margin-bottom:10px}
+.writebox{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.writebox .main{flex:999 1 420px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.writebox aside{flex:1 1 240px;background:var(--bg);border-radius:var(--r);padding:16px;font-size:15px}
+aside h3{font-size:17px;margin:10px 0 4px} aside h3:first-child{margin-top:0}
+aside p{margin:0 0 4px}
+.part-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.part-h .pill{font-size:15px;letter-spacing:.04em}
+.count{font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;color:var(--teal)}
+table.check{width:100%;border-collapse:collapse}
+table.check th{text-align:left;font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;border-bottom:2px solid var(--ink);padding:8px}
+table.check td{border-bottom:1px solid #E5E7EB;padding:10px 8px;vertical-align:top}
+.mark{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;font-family:'Fredoka',sans-serif;font-weight:700;color:#fff;background:var(--teal)}
+.yes{color:#1D6B36;font-weight:700} .notyet{color:var(--orange-d);font-weight:700}
+.cb{display:flex;align-items:center;gap:10px;min-height:44px}
+.cb input{width:24px;height:24px;accent-color:var(--teal)}
+.navbtns{display:flex;justify-content:space-between;gap:12px;margin-top:26px;flex-wrap:wrap}
+.final{background:#FFFDF7;border:1.5px solid #EADFC0;border-radius:var(--r);padding:28px 32px;font-size:21px;line-height:1.8}
+.final h3{font-size:30px;text-align:center}
+.final .by{text-align:center;color:var(--muted);margin:4px 0 18px}
+.final p{margin:0 0 14px;text-indent:2em}
+.dialog-back{position:fixed;inset:0;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+.dialog{background:#fff;border-radius:20px;padding:24px;max-width:440px}
+.dialog p{margin:8px 0 18px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:12px;font-size:16px;z-index:11}
+.welcome{display:flex;flex-direction:column;gap:18px;max-width:640px}
+.welcome .big{font-size:40px;font-family:'Fredoka',sans-serif;font-weight:700;line-height:1.1}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">My <span>PROMPT</span> Writer</div>
+  <div class="who">
+    <span id="hello"></span>
+    <span class="stars" aria-live="polite"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="#C98A00"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6-6.2 3.6 1.4-7L2 9.3l7-.8z"/></svg><span id="starCount">0</span> of 9 stars</span>
+    <span class="save" id="saveState" aria-live="polite"></span>
+  </div>
+</header>
+<div class="wrap">
+  <nav class="steps" id="nav" aria-label="Writing steps"></nav>
+  <main><div class="panel" id="panel"></div></main>
+</div>
+<div id="layer"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- content ---------- */
+const VOCAB=[
+ {w:"curious",pos:"adjective",m:"wanting to know or learn about something",ex:"The curious cat sniffed the strange box.",stem:"curious"},
+ {w:"enormous",pos:"adjective",m:"very, very big",ex:"An enormous wave crashed on the beach.",stem:"enormous"},
+ {w:"nervous",pos:"adjective",m:"feeling worried or a little scared",ex:"I felt nervous before my spelling test.",stem:"nervous"},
+ {w:"delighted",pos:"adjective",m:"very happy and pleased",ex:"Grandma was delighted with the card I made.",stem:"delight"},
+ {w:"suddenly",pos:"adverb",m:"quickly and without warning",ex:"Suddenly, the lights went out!",stem:"sudden"},
+ {w:"discover",pos:"verb",m:"to find something for the first time",ex:"We discovered a tiny frog under a leaf.",stem:"discover"}
+];
+const PROMPTS=[
+ {t:"The Mystery Box",p:"A box shows up at your door with your name on it. It is moving! What is inside, and what happens next?",s:"When I lifted the lid, I could not believe my eyes because"},
+ {t:"Tiny Me",p:"You wake up and you are as small as a pencil. How do you get through your day?",s:"The first thing I noticed when I woke up was"},
+ {t:"My Pet Can Talk",p:"Your pet (or a pet you wish you had) starts talking. What does it say? What do you do?",s:"I was eating breakfast when my pet looked up and said,"},
+ {t:"My Best Day (true story)",p:"Think of one of the best days you ever had. Tell who was there and what happened.",s:"One of the best days of my life was when"}
+];
+const BANK=[
+ ["Characters",["a dragon","a robot","my best friend","a lost puppy","a wizard","a soccer coach"]],
+ ["Places",["a dark cave","the school bus","outer space","a candy shop","the beach","a treehouse"]],
+ ["Things",["a magic key","a treasure map","a backpack","a golden egg","a flashlight","a remote"]],
+ ["Action words",["zoomed","tumbled","whispered","searched","rescued","giggled"]],
+ ["Feelings",["curious","nervous","delighted","brave","confused","proud"]]
+];
+const BLANKS=[["day","day of the week"],["adj1","adjective"],["food","food"],["adj2","adjective"],["animal","animal"],["verbed","verb ending in -ed"],["verb","verb"],["name","a friend's name"],["silly","silly word"],["number","number"],["plural","plural noun"],["noun1","noun"],["adj3","adjective"],["noun2","noun"],["funny","funny name"],["feeling","feeling word"]];
+const FILL_TEXT="Last {day}, something {adj1} happened in our lunchroom. I was eating my {food} when a {adj2} {animal} {verbed} through the door! Everyone started to {verb}. My best friend, {name}, yelled, “{silly}!” The animal jumped onto a table and ate {number} {plural}. Our principal tried to catch it with a {noun1}, but it was too {adj3}. Finally, I had an idea. I held out my {noun2} and said, “Come here, little buddy.” It walked right over to me! Now it is our class pet, and we named it {funny}. I felt so {feeling} that day!";
+const LINKING=["First","Next","Then","After that","Suddenly","Later","In the end","Finally"];
+const PARTS=[["who","Who?"],["what","Did what?"],["where","Where?"],["when","When?"],["why","Why?"]];
+
+/* ---------- state ---------- */
+const KEY="prompt-writer-v1";
+function fresh(){return {v:1,updated:0,name:"",step:0,vocab:{},builds:[{},{}],stretch:"",prompt:null,quick:{},wb:{title:"",text:""},fill:{},showFill:false,bs:{},plan:{},story:{title:"",beginning:"",middle:"",end:""},self:{},star:"",wish:""};}
+let S=fresh();
+try{const raw=localStorage.getItem(KEY);if(raw){S=Object.assign(fresh(),JSON.parse(raw));}}catch(e){}
+
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const get=(path)=>path.split(".").reduce((o,k)=>o==null?undefined:o[k],S);
+function set(path,val){const ks=path.split(".");let o=S;for(let i=0;i<ks.length-1;i++){if(o[ks[i]]==null||typeof o[ks[i]]!=="object")o[ks[i]]={};o=o[ks[i]];}o[ks[ks.length-1]]=val;}
+const words=t=>(t||"").trim().split(/\s+/).filter(Boolean).length;
+const filled=t=>words(t)>=3;
+
+/* ---------- saving ---------- */
+let db=null,uid=null,saveTimer=null,dbTimer=null,writing=false,pending=false;
+const saveEl=document.getElementById("saveState");
+function save(){
+  S.updated=Date.now();
+  clearTimeout(saveTimer);
+  saveEl.textContent="Saving…";
+  saveTimer=setTimeout(()=>{
+    try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+    if(!db||!uid)saveEl.textContent="Saved on this computer";
+  },500);
+  if(db&&uid){clearTimeout(dbTimer);dbTimer=setTimeout(pushDb,1800);}
+}
+async function pushDb(){
+  if(writing){pending=true;return;}
+  writing=true;
+  try{
+    await db.doc("data/users/"+uid+"/progress").set({state:JSON.stringify(S),updated:S.updated});
+    saveEl.textContent="Saved";
+  }catch(e){
+    if(e&&e.code==="invalid_argument"){db=null;saveEl.textContent="Saved on this computer";}
+    else saveEl.textContent="Saved on this computer";
+  }
+  writing=false;
+  if(pending){pending=false;pushDb();}
+}
+(async function initDb(){
+  try{
+    if(!window.claude||!window.claude.use)return;
+    const [d,u]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!d||!u)return;
+    const id=await u.id();
+    if(!id)return;
+    const snap=await d.doc("data/users/"+id+"/progress").get();
+    db=d;uid=id;
+    if(snap.exists){
+      const body=snap.data();
+      if(body&&body.updated>(S.updated||0)){
+        try{S=Object.assign(fresh(),JSON.parse(body.state));render();}catch(e){}
+      }
+    }
+    saveEl.textContent="Saved";
+  }catch(e){}
+})();
+
+/* ---------- read aloud & dictation ---------- */
+let tts=null,dict=null,dictTarget=null,dictBtn=null;
+const hasWebSpeech=typeof window.speechSynthesis!=="undefined";
+(async function(){
+  try{if(window.claude&&window.claude.use){tts=await window.claude.use("tts");dict=await window.claude.use("dictation");}}catch(e){}
+  if(dict){
+    try{
+      dict.onFinal(({text})=>{if(!dictTarget||!text)return;const t=dictTarget;const v=t.value;t.value=v+(v&&!/\s$/.test(v)?" ":"")+text;t.dispatchEvent(new Event("input",{bubbles:true}));});
+      dict.onState(({state})=>{if(state!=="listening"){if(dictBtn)dictBtn.classList.remove("on");dictBtn=null;dictTarget=null;}});
+    }catch(e){}
+  }
+  render();
+})();
+function canSpeak(){return !!tts||hasWebSpeech;}
+async function speak(text){
+  if(!text)return;
+  if(tts){try{await tts.speak(text.slice(0,2000),{rate:0.9});return;}catch(e){if(e&&e.code==="not_granted"){tts=null;}else if(e&&e.code!=="viewer_stopped"){}}}
+  if(hasWebSpeech){try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=0.9;window.speechSynthesis.speak(u);}catch(e){}}
+}
+function stopSpeak(){try{if(tts)tts.stop();}catch(e){}try{if(hasWebSpeech)window.speechSynthesis.cancel();}catch(e){}}
+const SPK='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M19 5a10 10 0 010 14"/></svg>';
+const MIC='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v5"/></svg>';
+function hearBtn(text,label){return canSpeak()?`<button class="icon-btn" data-say="${esc(text)}" aria-label="${esc(label||"Read it to me")}" title="Read it to me">${SPK}</button>`:"";}
+function micBtn(target){return dict?`<button class="icon-btn" data-mic="${target}" aria-label="Say it instead of typing" title="Say it">${MIC}<span>Say it</span></button>`:"";}
+
+/* ---------- helpers ---------- */
+const field=(path,ph,cls,id)=>`<textarea ${id?`id="${id}"`:""} class="${cls||""}" data-k="${path}" placeholder="${esc(ph||"")}" spellcheck="true">${esc(get(path)||"")}</textarea>`;
+const input=(path,ph,id)=>`<input type="text" ${id?`id="${id}"`:""} data-k="${path}" value="${esc(get(path)||"")}" placeholder="${esc(ph||"")}" autocomplete="off">`;
+function storyText(){const st=S.story;return [st.beginning,st.middle,st.end].map(x=>(x||"").trim()).filter(Boolean).join("\n\n");}
+function vocabUsed(text){const t=(text||"").toLowerCase();return VOCAB.filter(v=>new RegExp("\\b"+v.stem).test(t)).map(v=>v.w);}
+function combine(b){
+  let core=["who","what","where","why"].map(k=>(b[k]||"").trim()).filter(Boolean);
+  if(!core.length&&!(b.when||"").trim())return "";
+  const when=(b.when||"").trim();
+  if(when&&core.length){core[0]=core[0].replace(/^(My|The|A|An|Our|His|Her|Their|Your)\b/,m=>m.toLowerCase());}
+  let s=(when?when+(core.length?", ":""):"")+core.join(" ");
+  s=s.charAt(0).toUpperCase()+s.slice(1);
+  if(!/[.!?]$/.test(s))s+=".";
+  return s;
+}
+
+/* ---------- steps ---------- */
+const STEPS=[
+{id:"welcome",lbl:"Start here",star:false,render:()=>`
+<div class="welcome">
+  <span class="pill">Welcome, writer!</span>
+  <div class="big">Let’s write a story together.</div>
+  <p style="margin:0">You will learn new words, warm up with sentences, pick a fun idea, plan it, and then write your very own story. Earn a star for every step you finish!</p>
+  <div><label class="l" for="nm">What is your name?</label>${input("name","Type your name","nm")}</div>
+  <div class="card" style="background:var(--yellow-l);border:0">
+    <h3 style="font-size:19px;margin-bottom:6px">Writing tips</h3>
+    <ul style="margin:0;padding-left:22px">
+      <li>Say your sentence out loud first. Then type it.</li>
+      <li>Ideas come first. Spelling can be fixed later.</li>
+      ${canSpeak()?"<li>Press the speaker button to hear words read to you.</li>":""}
+      ${dict?"<li>Press <b>Say it</b> to talk instead of typing.</li>":""}
+      <li>Your work saves by itself.</li>
+    </ul>
+  </div>
+</div>`,done:()=>!!S.name.trim()},
+
+{id:"vocab",lbl:"Word Power",render:()=>head("Vocabulary","Word Power","Read each word. Press the speaker to hear it. Then type your own sentence using the word.")+`
+<div class="grid2">${VOCAB.map((v,i)=>`
+<div class="card ${i%2?"o":"t"}">
+  <div class="row" style="justify-content:space-between"><div><span class="word" style="color:var(--${i%2?"orange":"teal"})">${v.w}</span> <i class="hint">${v.pos}</i></div>${hearBtn(v.w+". "+v.m+". "+v.ex,"Hear "+v.w)}</div>
+  <p style="margin:6px 0 2px"><b>Means:</b> ${v.m}</p>
+  <p style="margin:0 0 10px"><b>Example:</b> <i>${v.ex}</i></p>
+  <label class="l" for="vc${i}">My sentence:</label>
+  ${field("vocab."+v.w,"Use the word "+v.w+" in a sentence…","","vc"+i)}
+  <div class="feedback" id="fb-${v.w}" aria-live="polite"></div>
+</div>`).join("")}</div>`,
+ live:()=>VOCAB.forEach(v=>{const el=document.getElementById("fb-"+v.w);if(!el)return;const t=S.vocab[v.w]||"";if(!t.trim()){el.innerHTML="";return;}
+   el.innerHTML=new RegExp("\\b"+v.stem,"i").test(t)?`<span class="good">★ Great! You used <b>${v.w}</b>.</span>`:`<span class="nudge">Keep going! Try to use the word <b>${v.w}</b>.</span>`;}),
+ done:()=>VOCAB.filter(v=>new RegExp("\\b"+v.stem,"i").test(S.vocab[v.w]||"")).length>=4},
+
+{id:"builder",lbl:"Sentence Builder",render:()=>head("Warm-up","Sentence Builder","Answer each question with a few words. Watch your sentence build itself!","or")+`
+<div class="ex"><h3 style="font-size:18px;margin-bottom:8px">Example</h3>
+ <div class="five">${PARTS.map(([k,l],i)=>`<div><label>${l}</label><div class="hint" style="font-size:16px;color:var(--ink)">${["My little brother","built a fort","in the living room","On Saturday","because it was raining"][i]}</div></div>`).join("")}</div>
+ <div class="together"><b>Together:</b> On Saturday, my little brother built a fort in the living room because it was raining.</div>
+</div>
+${[0,1].map(n=>`<div class="card ${n?"o":"t"}" style="margin-top:16px"><h3 style="font-size:19px;margin-bottom:10px">Build #${n+1}</h3>
+ <div class="five">${PARTS.map(([k,l])=>`<div><label for="b${n}${k}">${l}</label>${input("builds."+n+"."+k,"","b"+n+k)}</div>`).join("")}</div>
+ <div class="together" id="tog${n}" aria-live="polite"></div></div>`).join("")}
+<div class="card t" style="margin-top:16px"><div class="row" style="justify-content:space-between"><h3 style="font-size:19px">Stretch it! Make this tiny sentence bigger: “The dog barked.”</h3>${micBtn("st")}</div>
+ <p class="hint" style="margin:4px 0 8px">Add who, where, when, or why. Example: <i>Late last night, the dog barked at a raccoon in our backyard.</i></p>
+ ${field("stretch","Type your super sentence…","","st")}</div>`,
+ live:()=>[0,1].forEach(n=>{const el=document.getElementById("tog"+n);if(!el)return;const c=combine(S.builds[n]||{});el.innerHTML=c?`<b>Together:</b> ${esc(c)} ${hearBtn(c,"Hear my sentence")}`:`<span class="hint">Your sentence will show up here.</span>`;}),
+ done:()=>!!combine(S.builds[0]||{})&&words(S.stretch)>=5},
+
+{id:"prompt",lbl:"Pick a Prompt",render:()=>head("Prompts","Pick a Prompt","Choose the idea you like best. Then start a quick write with the starter sentence.")+`
+<div class="grid2">${PROMPTS.map((p,i)=>`<button class="card prompt" data-pick="${i}" aria-pressed="${S.prompt===i}"><span class="badge">${i+1}</span><span><span class="fred" style="font-size:21px;display:block">${p.t}</span><span style="font-size:16px">${p.p}</span></span></button>`).join("")}</div>
+${S.prompt!=null?`<div class="card t" style="margin-top:18px">
+ <div class="row" style="justify-content:space-between"><h3 style="font-size:20px">Prompt ${S.prompt+1}: ${PROMPTS[S.prompt].t}</h3><div class="row">${hearBtn(PROMPTS[S.prompt].p+" Start with: "+PROMPTS[S.prompt].s,"Hear the prompt")}${micBtn("qw")}</div></div>
+ <div class="starter" style="margin:10px 0"><b class="fred" style="color:var(--orange)">Start here:</b> ${PROMPTS[S.prompt].s}…</div>
+ <label class="l" for="qw">Quick write (keep the starter and finish it):</label>
+ ${field("quick."+S.prompt,"","big","qw")}
+ <div class="count" id="qwc"></div></div>`:`<p class="hint" style="margin-top:14px">Tap a prompt to choose it.</p>`}`,
+ live:()=>{const el=document.getElementById("qwc");if(el&&S.prompt!=null)el.textContent=words(S.quick[S.prompt])+" words";},
+ done:()=>S.prompt!=null&&words(S.quick[S.prompt])>=15},
+
+{id:"wordbank",lbl:"Word Bank Story",render:()=>head("Create a story","Word Bank Story","Tap a word to add it to your story. Try to use at least one word from every box. Used words turn green-blue!","or")+`
+<div class="bank">${BANK.map(([c,ws],i)=>`<div><h3 style="color:var(--${i%2?"orange":"teal"})">${c}</h3><div class="chips">${ws.map(w=>`<button class="chip" data-ins="${esc(w)}" data-target="wbt" data-bank="${esc(w)}">${w}</button>`).join("")}</div></div>`).join("")}</div>
+<div style="margin-top:16px"><label class="l" for="wbtitle">Title:</label>${input("wb.title","My story title","wbtitle")}</div>
+<div style="margin-top:12px"><div class="row" style="justify-content:space-between"><label class="l" for="wbt">My story:</label><div class="row">${micBtn("wbt")}</div></div>${field("wb.text","Once upon a time…","big","wbt")}</div>
+<div class="count" id="wbc" aria-live="polite" style="margin-top:8px"></div>`,
+ live:()=>{const t=(S.wb.text||"").toLowerCase();let used=0,boxes=0;BANK.forEach(([c,ws])=>{let any=false;ws.forEach(w=>{const on=t.includes(w.toLowerCase());if(on){used++;any=true;}const b=document.querySelector(`[data-bank="${CSS.escape(w)}"]`);if(b){b.classList.toggle("used",on);b.setAttribute("aria-pressed",on);}});if(any)boxes++;});
+   const el=document.getElementById("wbc");if(el)el.textContent=`You used ${used} words from ${boxes} of 5 boxes · ${words(S.wb.text)} words in your story`;},
+ done:()=>{const t=(S.wb.text||"").toLowerCase();return BANK.filter(([c,ws])=>ws.some(w=>t.includes(w.toLowerCase()))).length>=4&&words(S.wb.text)>=30;}},
+
+{id:"fill",lbl:"Fill-in Story",render:()=>head("Fill in the blank","The Day the Lunchroom Went Wild","Type a word for each clue. Don’t peek at the story! Then press Show My Story.")+`
+<div class="types">
+ <div class="type tl"><b>Noun</b>person, place, or thing<br><i>dog, park, spoon</i></div>
+ <div class="type ol"><b>Verb</b>an action word<br><i>jump, sing, wiggle</i></div>
+ <div class="type tl"><b>Adjective</b>a describing word<br><i>silly, huge, sticky</i></div>
+ <div class="type ol"><b>Plural noun</b>more than one thing<br><i>pickles, socks</i></div>
+</div>
+<div class="blanks">${BLANKS.map(([k,l],i)=>`<div><label class="l" for="f${k}">${i+1}. ${l}</label>${input("fill."+k,"","f"+k)}</div>`).join("")}</div>
+<div class="row" style="margin-top:18px"><button class="btn or" data-act="showfill">${S.showFill?"Update My Story":"Show My Story"}</button></div>
+<div id="fillout" style="margin-top:16px"></div>`,
+ live:()=>{const el=document.getElementById("fillout");if(!el)return;if(!S.showFill){el.innerHTML="";return;}
+   const plain=FILL_TEXT.replace(/\{(\w+)\}/g,(m,k)=>(S.fill[k]||"").trim()||"blank");
+   el.innerHTML=`<div class="story-out">${FILL_TEXT.replace(/\{(\w+)\}/g,(m,k)=>`<mark>${esc((S.fill[k]||"").trim()||"_____")}</mark>`)}</div><div class="row" style="margin-top:10px">${canSpeak()?`<button class="btn ghost" data-say="${esc(plain)}">${SPK.replace('aria-hidden="true"','aria-hidden="true" width="22" height="22"')} Read it to me</button>`:""}<span class="hint">Which word made you laugh the most?</span></div>`;},
+ done:()=>BLANKS.every(([k])=>(S.fill[k]||"").trim())&&S.showFill},
+
+{id:"brainstorm",lbl:"Brainstorm",render:()=>head("Brainstorm","My Story Web","Type quick notes in every box. No full sentences needed yet!","or")+`
+<p style="margin:0 0 14px"><b>My prompt:</b> ${S.prompt!=null?esc(PROMPTS[S.prompt].t):`<span class="hint">Not picked yet. Go back to step 3, or make up your own idea!</span>`}</p>
+<div class="web">
+ ${bcard("who","Who?","Who is in my story? What are they like?","t")}
+ ${bcard("where","Where?","Where does it happen?","o")}
+ ${bcard("when","When?","Morning? Night? Summer? Long ago?","t")}
+ ${bcard("problem","The Problem","What goes wrong? What does my character want?","o")}
+ ${bcard("idea","My Big Idea","Say your whole story in one sentence.","t center")}
+ ${bcard("solution","The Solution","How does it get fixed? How does it end?","o")}
+ ${bcard("feelings","Feelings","How do the characters feel at the start? At the end?","t")}
+ <div class="card o"><h3>5 Senses</h3><div class="hint">What would I notice if I were there?</div>
+  ${["see","hear","smell","feel","taste"].map(s=>`<div class="sense"><span>I ${s}:</span><label class="sr" for="bs${s}">I ${s}</label>${input("bs."+s,"","bs"+s)}</div>`).join("")}</div>
+ ${bcard("words","Cool Words","Words from Word Power I want to use.","t")}
+</div>`,
+ done:()=>["who","where","problem","idea","solution"].every(k=>(S.bs[k]||"").trim())},
+
+{id:"plan",lbl:"Plan It",render:()=>head("Plan it","Plan It in Order","Type one sentence for each part. (Want to draw it too? Use the paper book!)")+`
+<div class="plan">${[["first","First","teal"],["next","Next","orange"],["then","Then","orange"],["finally","Finally","teal"]].map(([k,l,c])=>`<div class="card ${c==="teal"?"t":"o"}"><h3 style="background:var(--${c})">${l}</h3><label class="sr" for="pl${k}">${l}</label>${field("plan."+k,l+", …","","pl"+k)}</div>`).join("")}</div>
+<div class="ex" style="margin-top:16px"><b class="fred">Linking words:</b> ${LINKING.join(" · ")}</div>`,
+ done:()=>["first","next","then","finally"].every(k=>words(S.plan[k])>=3)},
+
+{id:"write",lbl:"Write My Story",render:()=>{
+  const st=S.prompt!=null?PROMPTS[S.prompt].s:"";
+  if(st&&!S.story.beginning)S.story.beginning=st+" ";
+  return head("Write it","Write My Story","Use your brainstorm and your plan. Look at the notes on the side if you get stuck.","or")+`
+<div class="writebox"><div class="main">
+ <div><label class="l" for="sttl">Title:</label>${input("story.title","My story title","sttl")}</div>
+ <div class="card" style="background:var(--bg);border:0;padding:12px 14px"><div class="hint" style="margin-bottom:6px">Tap to add a word to the box you are typing in:</div>
+  <div class="chips">${LINKING.map(w=>`<button class="chip" data-ins="${w}" data-target="last">${w}</button>`).join("")}${VOCAB.map(v=>`<button class="chip" data-ins="${v.w}" data-target="last" style="border-color:var(--orange)">${v.w}</button>`).join("")}</div></div>
+ ${part("beginning","Beginning","Who is in the story? Where are they?","teal")}
+ ${part("middle","Middle","What is the problem? What happens?","orange")}
+ ${part("end","End","How is the problem solved? How does everyone feel?","teal")}
+ <div class="row" style="justify-content:space-between"><span class="count" id="wc" aria-live="polite"></span>${canSpeak()?`<button class="btn ghost" data-act="readstory">${SPK.replace('aria-hidden="true"','aria-hidden="true" width="22" height="22"')} Read my story to me</button>`:""}</div>
+</div>
+<aside aria-label="My notes">
+ <h3>My prompt</h3><p>${S.prompt!=null?esc(PROMPTS[S.prompt].t):"Not picked"}</p>
+ <h3>Big idea</h3><p>${esc(S.bs.idea||"—")}</p>
+ <h3>Who / Where</h3><p>${esc(S.bs.who||"—")} / ${esc(S.bs.where||"—")}</p>
+ <h3>Problem</h3><p>${esc(S.bs.problem||"—")}</p>
+ <h3>Solution</h3><p>${esc(S.bs.solution||"—")}</p>
+ <h3>My plan</h3>${["first","next","then","finally"].map(k=>`<p><b>${k[0].toUpperCase()+k.slice(1)}:</b> ${esc(S.plan[k]||"—")}</p>`).join("")}
+</aside></div>`;},
+ live:()=>{const el=document.getElementById("wc");if(el)el.textContent=words(storyText())+" words · "+vocabUsed(storyText()).length+" Word Power words";},
+ done:()=>filled(S.story.beginning)&&filled(S.story.middle)&&filled(S.story.end)&&words(storyText())>=60},
+
+{id:"check",lbl:"Check and Shine",render:()=>head("Check it","Check and Shine","Read your story one more time. The computer checks some things. You check the rest!")+`
+<table class="check"><thead><tr><th colspan="2">Did I…?</th><th style="width:150px">Check</th></tr></thead><tbody id="ckbody"></tbody></table>
+<div class="grid2" style="margin-top:18px">
+ <div class="card t" style="background:var(--teal-l)"><label class="l" for="star">★ A star: something I did great</label>${field("star","","","star")}</div>
+ <div class="card o" style="background:var(--orange-l)"><label class="l" for="wish">A wish: something to try next time</label>${field("wish","","","wish")}</div>
+</div>`,
+ live:()=>{const body=document.getElementById("ckbody");if(!body)return;body.innerHTML=checks().map(c=>`<tr><td style="width:48px"><span class="mark" style="background:var(--${c.auto?"teal":"orange"})">${c.l}</span></td><td><b>${c.n}:</b> ${c.d}${c.tip&&!c.ok?`<div class="hint nudge">${c.tip}</div>`:""}</td><td>${c.auto?(c.ok?`<span class="yes">✓ Yes!</span>`:`<span class="notyet">Not yet</span>`):`<label class="cb"><input type="checkbox" data-self="${c.key}" ${S.self[c.key]?"checked":""}> I checked</label>`}</td></tr>`).join("");},
+ done:()=>checks().every(c=>c.auto?true:S.self[c.key])&&words(S.star)>=2},
+
+{id:"finish",lbl:"My Finished Story",star:false,render:()=>{
+  const t=storyText();
+  return head("Ta-da!","My Finished Story","Read it, hear it, and share it with someone you love.","or")+(t?`
+<div class="final"><h3>${esc(S.story.title||"My Story")}</h3><div class="by">by ${esc(S.name||"me")}</div>${t.split(/\n\n/).map(p=>`<p>${esc(p)}</p>`).join("")}</div>
+<div class="row" style="margin-top:16px">
+ ${canSpeak()?`<button class="btn" data-act="readstory">${SPK.replace('aria-hidden="true"','aria-hidden="true" width="22" height="22"')} Read it to me</button>`:""}
+ <button class="btn ghost" data-act="copy">Copy my story</button>
+ <button class="btn ghost" data-act="dl" id="dlBtn" hidden>Download my story</button>
+ <button class="btn ghost" data-act="dlall" id="dlAll" hidden>Download all my work</button>
+ <button class="btn or" data-act="new">Start a new story</button>
+</div>`:`<p>Your story will show up here after you write it in step 9.</p>`);},
+ live:()=>{(async()=>{const d=await getDl();["dlBtn","dlAll"].forEach(id=>{const b=document.getElementById(id);if(b)b.hidden=!d;});})();}}
+];
+function head(tag,title,text,or){return `<div class="head"><span class="pill ${or||""}" style="align-self:flex-start">${tag}</span><h2>${title}</h2><p>${text}</p></div>`;}
+function bcard(k,t,h,c){return `<div class="card ${c}"><h3>${t}</h3><label class="hint" for="bs${k}" style="display:block;margin-bottom:6px">${h}</label>${field("bs."+k,"","","bs"+k)}</div>`;}
+function part(k,t,h,c){return `<div><div class="part-h"><span class="pill" style="background:var(--${c})">${t}</span><label class="hint" for="sp${k}">${h}</label><span style="margin-left:auto">${micBtn("sp"+k)}</span></div>${field("story."+k,"","big","sp"+k)}</div>`;}
+
+function checks(){
+  const t=storyText();
+  const sents=(t.match(/[^.!?\n]+[.!?]*["”]?/g)||[]).map(s=>s.trim()).filter(s=>/[a-z]/i.test(s));
+  const capsOk=sents.length>0&&sents.every(s=>/^["“]?[A-Z0-9]/.test(s))&&!/(^|[\s"“])i(\s|'|’)/.test(t);
+  const partsTxt=[S.story.beginning,S.story.middle,S.story.end].map(x=>(x||"").trim()).filter(Boolean);
+  const puncOk=partsTxt.length>0&&partsTxt.every(p=>/[.!?]["”]?$/.test(p));
+  const starter=S.prompt!=null?PROMPTS[S.prompt].s.slice(0,22).toLowerCase():"";
+  const vu=vocabUsed(t);
+  return [
+   {l:"C",n:"Capitals",d:"Every sentence (and the word “I”) starts with a capital letter.",auto:true,ok:capsOk,tip:"Look at the first letter of each sentence. Is “i” by itself a capital “I”?"},
+   {l:"U",n:"Understanding",d:"My story makes sense when I read it out loud.",auto:false,key:"understand"},
+   {l:"P",n:"Punctuation",d:"My sentences end with . ? or !",auto:true,ok:puncOk,tip:"Check the end of each part."},
+   {l:"S",n:"Spelling",d:"I fixed the words with a red squiggly line under them.",auto:false,key:"spell"},
+   {l:"★",n:"Starter",d:"I used my starter sentence.",auto:true,ok:!!starter&&t.toLowerCase().includes(starter),tip:S.prompt==null?"Pick a prompt in step 3.":"Start your Beginning with the starter sentence."},
+   {l:"★",n:"Word Power",d:`I used at least 2 vocabulary words.${vu.length?" (I used: "+vu.join(", ")+")":""}`,auto:true,ok:vu.length>=2,tip:"Try curious, enormous, nervous, delighted, suddenly, or discover."},
+   {l:"★",n:"Story parts",d:"My story has a beginning, middle, and end.",auto:true,ok:filled(S.story.beginning)&&filled(S.story.middle)&&filled(S.story.end)},
+   {l:"★",n:"Linking words",d:"I used a linking word like suddenly or finally.",auto:true,ok:LINKING.some(w=>new RegExp("\\b"+w+"\\b","i").test(t))}
+  ];
+}
+
+/* ---------- rendering ---------- */
+const nav=document.getElementById("nav"),panel=document.getElementById("panel");
+function stars(){return STEPS.filter(s=>s.star!==false&&s.done&&s.done()).length;}
+function renderNav(){
+  nav.innerHTML=STEPS.map((s,i)=>{const d=s.star!==false&&s.done&&s.done();return `<button class="step" data-go="${i}" ${S.step===i?'aria-current="step"':""}><span class="num ${d?"done":""}">${d?"★":i}</span><span class="lbl">${s.lbl}${d?'<span class="sr"> (done)</span>':""}</span></button>`;}).join("");
+  document.getElementById("starCount").textContent=stars();
+  document.getElementById("hello").textContent=S.name.trim()?"Hi, "+S.name.trim()+"!":"";
+}
+function render(){
+  if(S.step<0||S.step>=STEPS.length)S.step=0;
+  const s=STEPS[S.step];
+  panel.innerHTML=s.render()+`<div class="navbtns">${S.step>0?`<button class="btn ghost" data-go="${S.step-1}">← Back</button>`:"<span></span>"}${S.step<STEPS.length-1?`<button class="btn" data-go="${S.step+1}">${S.step===0?"Let’s go!":"Next →"}</button>`:""}</div>`;
+  renderNav();live();
+}
+function live(){const s=STEPS[S.step];if(s.live)s.live();renderNav();}
+
+let lastBox=null;
+panel.addEventListener("focusin",e=>{if(e.target.matches("textarea,input[type=text]"))lastBox=e.target;});
+document.addEventListener("input",e=>{
+  const k=e.target.getAttribute&&e.target.getAttribute("data-k");
+  if(!k)return;
+  set(k,e.target.value);save();live();
+});
+document.addEventListener("change",e=>{
+  const k=e.target.getAttribute&&e.target.getAttribute("data-self");
+  if(k){S.self[k]=e.target.checked;save();renderNav();}
+});
+function insertInto(el,text){
+  if(!el)return;
+  const v=el.value,a=el.selectionStart??v.length,b=el.selectionEnd??v.length;
+  const before=v.slice(0,a),after=v.slice(b);
+  const pre=before&&!/\s$/.test(before)?" ":"";
+  const post=after&&!/^\s/.test(after)?" ":"";
+  el.value=before+pre+text+post+after;
+  const pos=(before+pre+text+post).length;
+  el.focus();try{el.setSelectionRange(pos,pos);}catch(e){}
+  el.dispatchEvent(new Event("input",{bubbles:true}));
+}
+document.addEventListener("click",async e=>{
+  const go=e.target.closest("[data-go]");
+  if(go){stopSpeak();S.step=+go.getAttribute("data-go");save();render();window.scrollTo({top:0,behavior:"smooth"});return;}
+  const say=e.target.closest("[data-say]");
+  if(say){speak(say.getAttribute("data-say"));return;}
+  const pick=e.target.closest("[data-pick]");
+  if(pick){const i=+pick.getAttribute("data-pick");if(S.prompt!==i){S.prompt=i;if(!S.quick[i])S.quick[i]=PROMPTS[i].s+" ";}save();render();const q=document.getElementById("qw");if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length);}return;}
+  const ins=e.target.closest("[data-ins]");
+  if(ins){const tg=ins.getAttribute("data-target");const el=tg==="last"?(lastBox&&document.body.contains(lastBox)&&lastBox.tagName==="TEXTAREA"?lastBox:document.getElementById("spmiddle")):document.getElementById(tg);insertInto(el,ins.getAttribute("data-ins"));return;}
+  const mic=e.target.closest("[data-mic]");
+  if(mic&&dict){
+    if(dictBtn===mic){try{await dict.stop();}catch(x){}return;}
+    const target=document.getElementById(mic.getAttribute("data-mic"));
+    let p;try{p=dict.start();}catch(x){return;}
+    dictTarget=target;dictBtn=mic;mic.classList.add("on");
+    try{await p;}catch(x){mic.classList.remove("on");dictBtn=null;dictTarget=null;if(x&&x.code==="not_granted"){dict=null;render();}}
+    return;
+  }
+  const act=e.target.closest("[data-act]");
+  if(!act)return;
+  const a=act.getAttribute("data-act");
+  if(a==="showfill"){S.showFill=true;save();render();const o=document.getElementById("fillout");if(o)o.scrollIntoView({behavior:"smooth",block:"start"});}
+  if(a==="readstory"){speak((S.story.title?S.story.title+". ":"")+storyText());}
+  if(a==="copy"){const txt=storyFile();try{await navigator.clipboard.writeText(txt);toast("Copied! Paste it anywhere.");}catch(x){showCopyBox(txt);}}
+  if(a==="dl"||a==="dlall"){const d=await getDl();if(!d)return;const nm=(S.name.trim()||"my").replace(/[^a-z0-9]+/gi,"-").toLowerCase();
+    try{await d.save({filename:a==="dl"?nm+"-story.txt":nm+"-all-my-writing.txt",data:a==="dl"?storyFile():allWork()});toast("Saved!");}catch(x){}}
+  if(a==="new")confirmNew();
+});
+let dlP=null;function getDl(){if(!dlP)dlP=(async()=>{try{return window.claude&&window.claude.use?await window.claude.use("downloads"):null;}catch(e){return null;}})();return dlP;}
+function storyFile(){return `${S.story.title||"My Story"}\nby ${S.name||"me"}\n\n${storyText()}\n`;}
+function allWork(){
+  const L=[];const h=t=>L.push("","=== "+t+" ===");
+  L.push("MY PROMPT WRITER — "+(S.name||"Student"),new Date().toLocaleDateString());
+  h("Word Power");VOCAB.forEach(v=>L.push(v.w+": "+(S.vocab[v.w]||"")));
+  h("Sentence Builder");[0,1].forEach(n=>L.push("Build "+(n+1)+": "+combine(S.builds[n]||{})));L.push("Stretch it: "+(S.stretch||""));
+  h("Prompt");if(S.prompt!=null){L.push(PROMPTS[S.prompt].t,"Quick write: "+(S.quick[S.prompt]||""));}
+  h("Word Bank Story");L.push(S.wb.title||"",S.wb.text||"");
+  h("Fill-in Story");if(S.showFill)L.push(FILL_TEXT.replace(/\{(\w+)\}/g,(m,k)=>(S.fill[k]||"___").trim()));
+  h("Brainstorm");["who","where","when","problem","idea","solution","feelings","see","hear","smell","feel","taste","words"].forEach(k=>L.push(k+": "+(S.bs[k]||"")));
+  h("Plan");["first","next","then","finally"].forEach(k=>L.push(k+": "+(S.plan[k]||"")));
+  h("My Story");L.push(storyFile());
+  h("Check and Shine");checks().forEach(c=>L.push((c.auto?(c.ok?"[x] ":"[ ] "):(S.self[c.key]?"[x] ":"[ ] "))+c.n));L.push("Star: "+(S.star||""),"Wish: "+(S.wish||""));
+  return L.join("\n");
+}
+const layer=document.getElementById("layer");
+function toast(m){layer.innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;setTimeout(()=>{if(layer.querySelector(".toast"))layer.innerHTML="";},2200);}
+function showCopyBox(txt){layer.innerHTML=`<div class="dialog-back"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="cpT"><h3 id="cpT" class="fred" style="font-size:22px">Copy your story</h3><p>Press Ctrl+C (or Command+C) to copy.</p><textarea id="cpBox" style="min-height:160px">${esc(txt)}</textarea><div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn" id="cpClose">Done</button></div></div></div>`;const b=document.getElementById("cpBox");b.focus();b.select();document.getElementById("cpClose").onclick=()=>layer.innerHTML="";}
+function confirmNew(){
+  layer.innerHTML=`<div class="dialog-back"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="nwT"><h3 id="nwT" class="fred" style="font-size:22px">Start a new story?</h3><p>This clears your prompt, brainstorm, plan, story, and checklist so you can write a new one. Your Word Power sentences and your name stay. Download or copy this story first if you want to keep it.</p><div class="row" style="justify-content:flex-end"><button class="btn ghost" id="nwNo">Keep this story</button><button class="btn or" id="nwYes">Start new</button></div></div></div>`;
+  document.getElementById("nwNo").onclick=()=>layer.innerHTML="";
+  document.getElementById("nwYes").onclick=()=>{const keep={name:S.name,vocab:S.vocab};S=Object.assign(fresh(),keep,{step:3});layer.innerHTML="";save();render();};
+  document.getElementById("nwNo").focus();
+}
+render();
+})();
+</script>
+</body>
+</html>
